@@ -114,6 +114,9 @@ Doporucene nastaveni tokenu:
 5. **Generate new token**.
 6. Repository access: vybrat jen `test-hodiny`.
 7. Permissions -> **Contents**: **Read and write**.
-8. Vygenerovany token vlozit na strance do pole **GitHub token** a kliknout **Ulozit token**.
+8. Na strance kliknout na ikonku **Nastaveni**.
+9. Vygenerovany token vlozit do pole **GitHub token** a kliknout **Ulozit token**.
 
 Token se uklada jen do prohlizece pres `localStorage`. Neni ulozeny v repozitari.
+
+V nastaveni jsou taky servisni tlacitka **Stahnout CSV** a **Nacist z GitHubu**.

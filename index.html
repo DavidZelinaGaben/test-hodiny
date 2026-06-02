@@ -97,6 +97,13 @@
         color: var(--ink);
       }
 
+      button.icon-button {
+        width: 38px;
+        padding: 0;
+        font-size: 20px;
+        line-height: 1;
+      }
+
       button.danger {
         background: #a62929;
         border-color: #a62929;
@@ -181,6 +188,13 @@
         color: var(--muted);
         font-size: 13px;
         text-align: right;
+      }
+
+      .settings-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 0 16px 16px;
       }
 
       form {
@@ -293,22 +307,25 @@
         </div>
         <div class="toolbar">
           <select id="monthSelect" aria-label="Mesic"></select>
-          <button id="downloadButton" type="button">Stahnout CSV</button>
-          <button id="resetButton" class="secondary" type="button">Nacist z GitHubu</button>
+          <button id="settingsButton" class="icon-button secondary" type="button" aria-label="Nastaveni" title="Nastaveni">⚙</button>
         </div>
       </header>
 
       <p id="message" class="message">Nacitam hodiny...</p>
 
-      <section class="panel">
+      <section id="settingsPanel" class="panel hidden">
         <div class="panel-head">
-          <h2>Ukladani do GitHubu</h2>
+          <h2>Nastaveni</h2>
           <span id="saveStatus" class="save-status">Token neni nastaveny</span>
         </div>
         <div class="github-settings">
           <input id="tokenInput" type="password" autocomplete="off" placeholder="GitHub token s opravnenim Contents: Read and write">
           <button id="saveTokenButton" type="button">Ulozit token</button>
           <button id="clearTokenButton" class="secondary" type="button">Zapomenout token</button>
+        </div>
+        <div class="settings-actions">
+          <button id="downloadButton" class="secondary" type="button">Stahnout CSV</button>
+          <button id="resetButton" class="secondary" type="button">Nacist z GitHubu</button>
         </div>
       </section>
 
@@ -398,6 +415,8 @@
       const GITHUB_CONTENTS_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${CSV_PATH}`;
 
       const monthSelect = document.getElementById("monthSelect");
+      const settingsButton = document.getElementById("settingsButton");
+      const settingsPanel = document.getElementById("settingsPanel");
       const downloadButton = document.getElementById("downloadButton");
       const resetButton = document.getElementById("resetButton");
       const message = document.getElementById("message");
@@ -807,6 +826,10 @@
         localStorage.removeItem(TOKEN_KEY);
         updateTokenUi();
         render();
+      });
+
+      settingsButton.addEventListener("click", () => {
+        settingsPanel.classList.toggle("hidden");
       });
 
       addForm.addEventListener("submit", (event) => {
