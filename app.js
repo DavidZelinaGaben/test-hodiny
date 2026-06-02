@@ -537,6 +537,14 @@ function bindSettingsPage() {
   });
 
   byId("clearTokenButton").addEventListener("click", () => {
+    const confirmed = window.confirm(
+      "Opravdu zapomenout GitHub token? Bez tokenu se zmeny nebudou ukladat do GitHubu."
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
     localStorage.removeItem(TOKEN_KEY);
     updateTokenUi();
     render();
