@@ -70,6 +70,7 @@ Po zapnuti GitHub Pages pujde otevrit primo v prohlizeci a ukaze:
 - kolik hodin zbyva z limitu 20 h,
 - jestli je potreba poslat nabidku,
 - jednotlive zaznamy z `hodiny.csv`.
+- formular pro pridani noveho zaznamu.
 
 Zapnuti v GitHubu:
 
@@ -83,3 +84,16 @@ Zapnuti v GitHubu:
 5. Kliknout na **Save**.
 
 GitHub pak ukaze odkaz na hotovou stranku.
+
+## Pridani hodin pres stranku
+
+Na strance kliknout na **Pridat hodiny**.
+
+Formular pripravi GitHub issue s novym zaznamem. Po potvrzeni issue se automaticky spusti GitHub Action, ktera:
+
+1. overi, ze autor issue muze zapisovat do repozitare,
+2. pripise zaznam do `hodiny.csv`,
+3. commitne zmenu,
+4. zavre issue.
+
+Bezpecnostne to znamena, ze verejny navstevnik nemuze jen tak zapisovat do CSV.
