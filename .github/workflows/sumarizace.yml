@@ -1,0 +1,30 @@
+name: Sumarizace hodin
+
+on:
+  push:
+    paths:
+      - "hodiny.csv"
+      - "sumarizace.py"
+      - ".github/workflows/sumarizace.yml"
+  pull_request:
+    paths:
+      - "hodiny.csv"
+      - "sumarizace.py"
+      - ".github/workflows/sumarizace.yml"
+  workflow_dispatch:
+
+jobs:
+  sumarizace:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Spustit sumarizaci
+        run: python sumarizace.py
