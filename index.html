@@ -3,20 +3,19 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>CEBES - sumarizace hodin</title>
+    <title>CEBES - hodiny</title>
     <style>
       :root {
-        color-scheme: light;
         --bg: #f5f6f8;
         --panel: #ffffff;
         --ink: #1c2430;
         --muted: #5d6878;
         --line: #d9dee7;
+        --accent: #2457a6;
         --ok: #147a4d;
         --warn: #b44900;
         --soft-ok: #e6f4ed;
         --soft-warn: #fff0e1;
-        --accent: #2457a6;
       }
 
       * {
@@ -32,7 +31,7 @@
       }
 
       main {
-        width: min(1120px, calc(100% - 32px));
+        width: min(1180px, calc(100% - 32px));
         margin: 0 auto;
         padding: 28px 0 40px;
       }
@@ -41,14 +40,21 @@
         display: flex;
         align-items: flex-end;
         justify-content: space-between;
-        gap: 20px;
-        margin-bottom: 22px;
+        gap: 18px;
+        margin-bottom: 18px;
+      }
+
+      h1,
+      h2 {
+        margin: 0;
       }
 
       h1 {
-        margin: 0;
         font-size: 28px;
-        font-weight: 700;
+      }
+
+      h2 {
+        font-size: 17px;
       }
 
       .subtitle {
@@ -58,18 +64,16 @@
 
       .toolbar {
         display: flex;
-        align-items: center;
-        gap: 10px;
         flex-wrap: wrap;
+        gap: 10px;
       }
 
       button,
+      input,
       select {
         min-height: 38px;
         border: 1px solid var(--line);
         border-radius: 6px;
-        background: var(--panel);
-        color: var(--ink);
         font: inherit;
       }
 
@@ -82,21 +86,32 @@
         font-weight: 700;
       }
 
-      .button-link {
-        display: inline-flex;
-        min-height: 38px;
-        align-items: center;
-        justify-content: center;
-        border-radius: 6px;
-        padding: 0 14px;
-        background: var(--accent);
-        color: #fff;
-        font-weight: 700;
-        text-decoration: none;
+      button.secondary {
+        background: var(--panel);
+        border-color: var(--line);
+        color: var(--ink);
       }
 
+      button.danger {
+        background: #a62929;
+        border-color: #a62929;
+      }
+
+      input,
       select {
-        padding: 0 34px 0 10px;
+        width: 100%;
+        padding: 0 10px;
+        background: #fff;
+        color: var(--ink);
+      }
+
+      .message {
+        margin: 0 0 18px;
+        padding: 12px 14px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        color: var(--muted);
       }
 
       .summary {
@@ -129,25 +144,35 @@
         font-size: 24px;
       }
 
-      .metric.status-ok {
+      .status-ok {
         background: var(--soft-ok);
         border-color: #b8dfca;
       }
 
-      .metric.status-warn {
+      .status-warn {
         background: var(--soft-warn);
         border-color: #f1c499;
       }
 
       .panel {
+        margin-top: 18px;
         overflow: hidden;
       }
 
-      .panel h2 {
-        margin: 0;
+      .panel-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
         padding: 14px 16px;
         border-bottom: 1px solid var(--line);
-        font-size: 17px;
+      }
+
+      form {
+        display: grid;
+        grid-template-columns: 150px 150px 170px 1fr 120px auto;
+        gap: 10px;
+        padding: 16px;
       }
 
       table {
@@ -157,7 +182,7 @@
 
       th,
       td {
-        padding: 11px 16px;
+        padding: 10px 12px;
         border-bottom: 1px solid var(--line);
         text-align: left;
         vertical-align: top;
@@ -165,13 +190,17 @@
 
       th {
         color: var(--muted);
-        font-size: 13px;
-        font-weight: 700;
         background: #fafbfc;
+        font-size: 13px;
       }
 
       tr:last-child td {
         border-bottom: 0;
+      }
+
+      td input,
+      td select {
+        min-height: 34px;
       }
 
       .number {
@@ -199,54 +228,43 @@
         background: var(--soft-warn);
       }
 
-      .message {
-        margin: 0 0 18px;
-        padding: 12px 14px;
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        background: var(--panel);
-        color: var(--muted);
-      }
-
       .hidden {
         display: none;
       }
 
-      @media (max-width: 760px) {
-        main {
-          width: min(100% - 20px, 1120px);
-          padding-top: 18px;
-        }
-
+      @media (max-width: 900px) {
         header {
           display: block;
         }
 
         .toolbar {
-          margin-top: 16px;
+          margin-top: 14px;
         }
 
         .summary {
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
-        th,
-        td {
-          padding: 9px 10px;
-          font-size: 14px;
+        form {
+          grid-template-columns: 1fr 1fr;
         }
       }
 
-      @media (max-width: 520px) {
-        .summary {
+      @media (max-width: 620px) {
+        main {
+          width: min(100% - 20px, 1180px);
+          padding-top: 18px;
+        }
+
+        .summary,
+        form {
           grid-template-columns: 1fr;
         }
 
-        .records th:nth-child(2),
-        .records td:nth-child(2),
-        .records th:nth-child(4),
-        .records td:nth-child(4) {
-          display: none;
+        th,
+        td {
+          padding: 8px;
+          font-size: 14px;
         }
       }
     </style>
@@ -255,13 +273,13 @@
     <main>
       <header>
         <div>
-          <h1>CEBES - sumarizace hodin</h1>
-          <p class="subtitle">Limit 20 hodin mesicne, data ze souboru hodiny.csv</p>
+          <h1>CEBES - hodiny</h1>
+          <p class="subtitle">Pridej radek primo na strance, soucet se prepocita hned.</p>
         </div>
         <div class="toolbar">
-          <a class="button-link" href="pridat.html">Pridat hodiny</a>
           <select id="monthSelect" aria-label="Mesic"></select>
-          <button id="reloadButton" type="button">Obnovit</button>
+          <button id="downloadButton" type="button">Stahnout CSV</button>
+          <button id="resetButton" class="secondary" type="button">Nacist z GitHubu</button>
         </div>
       </header>
 
@@ -287,7 +305,27 @@
       </section>
 
       <section class="panel">
-        <h2>Mesice</h2>
+        <div class="panel-head">
+          <h2>Pridat hodiny</h2>
+        </div>
+        <form id="addForm">
+          <input id="datumInput" type="date" required aria-label="Datum">
+          <input id="zakaznikInput" value="CEBES" required aria-label="Zakaznik">
+          <select id="typInput" aria-label="Typ">
+            <option value="SW">SW</option>
+            <option value="konzultace">konzultace</option>
+            <option value="jine">jine</option>
+          </select>
+          <input id="popisInput" placeholder="Popis prace" required aria-label="Popis prace">
+          <input id="hodinyInput" type="number" min="0.25" step="0.25" placeholder="1" required aria-label="Hodiny">
+          <button type="submit">Pridat</button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Mesice</h2>
+        </div>
         <table>
           <thead>
             <tr>
@@ -301,9 +339,11 @@
         </table>
       </section>
 
-      <section class="panel" style="margin-top: 18px;">
-        <h2>Zaznamy</h2>
-        <table class="records">
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Zaznamy</h2>
+        </div>
+        <table>
           <thead>
             <tr>
               <th>Datum</th>
@@ -311,6 +351,7 @@
               <th>Popis</th>
               <th>Typ</th>
               <th class="number">Hodiny</th>
+              <th></th>
             </tr>
           </thead>
           <tbody id="recordsBody"></tbody>
@@ -321,13 +362,21 @@
     <script>
       const LIMIT_HODIN = 20;
       const CSV_URL = "hodiny.csv";
+      const STORAGE_KEY = "test-hodiny-records-v1";
 
       const monthSelect = document.getElementById("monthSelect");
-      const reloadButton = document.getElementById("reloadButton");
+      const downloadButton = document.getElementById("downloadButton");
+      const resetButton = document.getElementById("resetButton");
       const message = document.getElementById("message");
       const summary = document.getElementById("summary");
       const monthsBody = document.getElementById("monthsBody");
       const recordsBody = document.getElementById("recordsBody");
+      const addForm = document.getElementById("addForm");
+      const datumInput = document.getElementById("datumInput");
+      const zakaznikInput = document.getElementById("zakaznikInput");
+      const typInput = document.getElementById("typInput");
+      const popisInput = document.getElementById("popisInput");
+      const hodinyInput = document.getElementById("hodinyInput");
       const limitValue = document.getElementById("limitValue");
       const usedValue = document.getElementById("usedValue");
       const balanceValue = document.getElementById("balanceValue");
@@ -337,22 +386,7 @@
       let records = [];
       let totals = new Map();
 
-      function parseCsv(text) {
-        const rows = text.trim().split(/\r?\n/).filter(Boolean);
-        const header = splitCsvLine(rows.shift());
-
-        return rows.map((row) => {
-          const values = splitCsvLine(row);
-          const item = Object.fromEntries(header.map((key, index) => [key, values[index] || ""]));
-          return {
-            datum: item.datum.trim(),
-            zakaznik: item.zakaznik.trim(),
-            popis: item.popis.trim(),
-            typ: item.typ.trim(),
-            hodiny: Number(item.hodiny.trim().replace(",", ".")),
-          };
-        });
-      }
+      datumInput.value = new Date().toISOString().slice(0, 10);
 
       function splitCsvLine(line) {
         const values = [];
@@ -380,6 +414,55 @@
         return values;
       }
 
+      function parseCsv(text) {
+        const rows = text.trim().split(/\r?\n/).filter(Boolean);
+        const header = splitCsvLine(rows.shift() || "");
+
+        return rows.map((row) => {
+          const values = splitCsvLine(row);
+          const item = Object.fromEntries(header.map((key, index) => [key, values[index] || ""]));
+          return normalizeRecord(item);
+        });
+      }
+
+      function normalizeRecord(item) {
+        return {
+          datum: String(item.datum || "").trim(),
+          zakaznik: String(item.zakaznik || "CEBES").trim(),
+          popis: String(item.popis || "").trim(),
+          typ: String(item.typ || "jine").trim(),
+          hodiny: Number(String(item.hodiny || "0").replace(",", ".")),
+        };
+      }
+
+      function escapeCsv(value) {
+        const text = String(value ?? "");
+        if (/[",\n\r]/.test(text)) {
+          return `"${text.replace(/"/g, '""')}"`;
+        }
+        return text;
+      }
+
+      function recordsToCsv() {
+        const header = ["datum", "zakaznik", "popis", "typ", "hodiny"];
+        const rows = records.map((record) =>
+          header.map((key) => escapeCsv(record[key])).join(",")
+        );
+        return `${header.join(",")}\n${rows.join("\n")}\n`;
+      }
+
+      function saveLocal() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+      }
+
+      function loadLocal() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (!stored) {
+          return null;
+        }
+        return JSON.parse(stored).map(normalizeRecord);
+      }
+
       function formatHours(value) {
         return `${Number(value.toFixed(2)).toString()} h`;
       }
@@ -399,7 +482,7 @@
         totals = new Map([...totals.entries()].sort((a, b) => b[0].localeCompare(a[0])));
       }
 
-      function renderMonthOptions() {
+      function keepSelectedMonth(previousMonth) {
         monthSelect.innerHTML = "";
 
         for (const month of totals.keys()) {
@@ -407,6 +490,10 @@
           option.value = month;
           option.textContent = month;
           monthSelect.append(option);
+        }
+
+        if (previousMonth && totals.has(previousMonth)) {
+          monthSelect.value = previousMonth;
         }
       }
 
@@ -445,68 +532,155 @@
         }
       }
 
+      function createEditableCell(record, key, index, type = "text") {
+        const cell = document.createElement("td");
+        const input = document.createElement("input");
+        input.type = type;
+        input.value = record[key];
+        input.addEventListener("change", () => {
+          records[index][key] = key === "hodiny" ? Number(input.value) : input.value.trim();
+          saveLocal();
+          render();
+        });
+        cell.append(input);
+        return cell;
+      }
+
+      function createTypeCell(record, index) {
+        const cell = document.createElement("td");
+        const select = document.createElement("select");
+
+        for (const value of ["SW", "konzultace", "jine"]) {
+          const option = document.createElement("option");
+          option.value = value;
+          option.textContent = value;
+          select.append(option);
+        }
+
+        select.value = record.typ;
+        select.addEventListener("change", () => {
+          records[index].typ = select.value;
+          saveLocal();
+          render();
+        });
+
+        cell.append(select);
+        return cell;
+      }
+
       function renderRecords() {
         const selectedMonth = monthSelect.value;
         recordsBody.innerHTML = "";
 
         records
-          .filter((record) => getMonth(record) === selectedMonth)
-          .sort((a, b) => b.datum.localeCompare(a.datum))
-          .forEach((record) => {
+          .map((record, index) => ({ record, index }))
+          .filter(({ record }) => getMonth(record) === selectedMonth)
+          .sort((a, b) => b.record.datum.localeCompare(a.record.datum))
+          .forEach(({ record, index }) => {
             const row = document.createElement("tr");
-            row.innerHTML = `
-              <td>${record.datum}</td>
-              <td>${record.zakaznik}</td>
-              <td>${record.popis}</td>
-              <td>${record.typ}</td>
-              <td class="number">${formatHours(record.hodiny)}</td>
-            `;
+            row.append(createEditableCell(record, "datum", index, "date"));
+            row.append(createEditableCell(record, "zakaznik", index));
+            row.append(createEditableCell(record, "popis", index));
+            row.append(createTypeCell(record, index));
+            row.append(createEditableCell(record, "hodiny", index, "number"));
+
+            const actionCell = document.createElement("td");
+            const deleteButton = document.createElement("button");
+            deleteButton.className = "danger";
+            deleteButton.type = "button";
+            deleteButton.textContent = "Smazat";
+            deleteButton.addEventListener("click", () => {
+              records.splice(index, 1);
+              saveLocal();
+              render();
+            });
+            actionCell.append(deleteButton);
+            row.append(actionCell);
             recordsBody.append(row);
           });
       }
 
       function render() {
-        if (records.length === 0) {
-          message.textContent = "V hodiny.csv zatim nejsou zadne zaznamy.";
+        const previousMonth = monthSelect.value;
+        calculateTotals();
+
+        if (records.length === 0 || totals.size === 0) {
+          message.textContent = "Zatim nejsou zadne hodiny.";
           message.classList.remove("hidden");
           summary.classList.add("hidden");
+          monthsBody.innerHTML = "";
+          recordsBody.innerHTML = "";
           return;
         }
 
-        message.classList.add("hidden");
-        calculateTotals();
-        renderMonthOptions();
+        message.textContent = "Zmeny na strance se ukladaji v tomhle prohlizeci. Pro ulozeni do GitHubu stahni CSV a nahraj ho do repo.";
+        message.classList.remove("hidden");
+        keepSelectedMonth(previousMonth);
         renderSummary();
         renderMonths();
         renderRecords();
       }
 
-      async function loadData() {
-        message.textContent = "Nacitam hodiny...";
-        message.classList.remove("hidden");
-
+      async function loadFromGithub() {
         const response = await fetch(`${CSV_URL}?t=${Date.now()}`);
         if (!response.ok) {
           throw new Error("Nepodarilo se nacist hodiny.csv.");
         }
-
         records = parseCsv(await response.text());
+      }
+
+      async function start() {
+        const localRecords = loadLocal();
+
+        if (localRecords) {
+          records = localRecords;
+        } else {
+          await loadFromGithub();
+          saveLocal();
+        }
+
         render();
       }
+
+      addForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        records.push(normalizeRecord({
+          datum: datumInput.value,
+          zakaznik: zakaznikInput.value,
+          popis: popisInput.value,
+          typ: typInput.value,
+          hodiny: hodinyInput.value,
+        }));
+        popisInput.value = "";
+        hodinyInput.value = "";
+        saveLocal();
+        render();
+      });
 
       monthSelect.addEventListener("change", () => {
         renderSummary();
         renderRecords();
       });
 
-      reloadButton.addEventListener("click", () => {
-        loadData().catch((error) => {
-          message.textContent = error.message;
-          message.classList.remove("hidden");
-        });
+      downloadButton.addEventListener("click", () => {
+        const blob = new Blob([recordsToCsv()], { type: "text/csv;charset=utf-8" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "hodiny.csv";
+        link.click();
+        URL.revokeObjectURL(link.href);
       });
 
-      loadData().catch((error) => {
+      resetButton.addEventListener("click", async () => {
+        localStorage.removeItem(STORAGE_KEY);
+        message.textContent = "Nacitam z GitHubu...";
+        message.classList.remove("hidden");
+        await loadFromGithub();
+        saveLocal();
+        render();
+      });
+
+      start().catch((error) => {
         message.textContent = error.message;
         message.classList.remove("hidden");
       });
