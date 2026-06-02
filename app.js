@@ -172,6 +172,7 @@ async function commitToGithub(reason) {
           sha: currentFile.sha,
         }),
       });
+      saveLocal();
       setSaveStatus(`Ulozeno do GitHubu ${new Date().toLocaleTimeString("cs-CZ")}`);
       return;
     } catch (error) {
@@ -441,6 +442,16 @@ async function start() {
   render();
 }
 
+async function refreshFromGithub() {
+  try {
+    await loadFromGithub();
+    saveLocal();
+    render();
+  } catch (error) {
+    setMessage(error.message);
+  }
+}
+
 function bindMainPage() {
   const datumInput = byId("datumInput");
   const zakaznikInput = byId("zakaznikInput");
@@ -523,3 +534,15 @@ if (monthSelect) {
 
 updateTokenUi();
 start().catch((error) => setMessage(error.message));
+
+window.addEventListener("pageshow", (event) => {
+  if (event.persisted && page === "main") {
+    refreshFromGithub();
+  }
+});
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible" && page === "main") {
+    refreshFromGithub();
+  }
+});
