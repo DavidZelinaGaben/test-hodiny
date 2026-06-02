@@ -12,6 +12,7 @@ const page = document.body.dataset.page;
 let records = [];
 let totals = new Map();
 let saveQueue = Promise.resolve();
+let pendingSaves = 0;
 
 function byId(id) {
   return document.getElementById(id);
@@ -195,6 +196,10 @@ async function commitToGithub(reason) {
   }
 }
 
+function updateSavingUi() {
+  document.body.classList.toggle("is-saving", pendingSaves > 0);
+}
+
 function persistChange(reason) {
   saveLocal();
   render();
@@ -204,9 +209,15 @@ function persistChange(reason) {
     return;
   }
 
+  pendingSaves += 1;
+  updateSavingUi();
   saveQueue = saveQueue
     .then(() => commitToGithub(reason))
-    .catch((error) => setSaveStatus(error.message));
+    .catch((error) => setSaveStatus(error.message))
+    .finally(() => {
+      pendingSaves = Math.max(0, pendingSaves - 1);
+      updateSavingUi();
+    });
 }
 
 function formatHours(value) {
@@ -494,6 +505,15 @@ function bindMainPage() {
 }
 
 function bindSettingsPage() {
+  byId("backButton").addEventListener("click", async () => {
+    if (pendingSaves > 0) {
+      setSaveStatus("Cekam na ulozeni do GitHubu...");
+      await saveQueue;
+    }
+
+    window.location.href = "./";
+  });
+
   byId("saveTokenButton").addEventListener("click", () => {
     const token = byId("tokenInput").value.trim();
 
@@ -551,6 +571,13 @@ if (monthSelect) {
 
 updateTokenUi();
 start().catch((error) => setMessage(error.message));
+
+window.addEventListener("beforeunload", (event) => {
+  if (pendingSaves > 0) {
+    event.preventDefault();
+    event.returnValue = "";
+  }
+});
 
 window.addEventListener("pageshow", (event) => {
   if (event.persisted && page === "main") {

@@ -104,6 +104,12 @@ button.danger {
   border-color: #a62929;
 }
 
+.is-saving button,
+.is-saving input,
+.is-saving select {
+  opacity: 0.72;
+}
+
 input,
 select {
   width: 100%;
