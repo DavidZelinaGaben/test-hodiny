@@ -59,3 +59,27 @@ python sumarizace.py --mesic 2026-06
 GitHub Action v `.github/workflows/sumarizace.yml` spusti sumarizaci pri kazde zmene souboru `hodiny.csv` nebo skriptu `sumarizace.py`.
 
 Vysledek bude videt v zalozce **Actions**.
+
+## Otevreni jako stranka
+
+V repozitari je taky jednoducha webova stranka v [index.html](index.html).
+
+Po zapnuti GitHub Pages pujde otevrit primo v prohlizeci a ukaze:
+
+- vycerpane hodiny ve vybranem mesici,
+- kolik hodin zbyva z limitu 20 h,
+- jestli je potreba poslat nabidku,
+- jednotlive zaznamy z `hodiny.csv`.
+
+Zapnuti v GitHubu:
+
+1. Otevrit repozitar `test-hodiny`.
+2. Jit do **Settings**.
+3. Vlevo kliknout na **Pages**.
+4. V casti **Build and deployment** vybrat:
+   - Source: **Deploy from a branch**
+   - Branch: **main**
+   - Folder: **/root**
+5. Kliknout na **Save**.
+
+GitHub pak ukaze odkaz na hotovou stranku.
