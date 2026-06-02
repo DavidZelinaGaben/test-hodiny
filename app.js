@@ -393,6 +393,7 @@ function renderEditableRecords() {
       row.append(createEditableCell(record, "hodiny", draft, "number"));
 
       const actionCell = document.createElement("td");
+      actionCell.className = "actions-cell";
       const saveButton = document.createElement("button");
       saveButton.type = "button";
       saveButton.textContent = "Ulozit";
