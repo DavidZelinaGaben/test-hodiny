@@ -70,7 +70,8 @@ Po zapnuti GitHub Pages pujde otevrit primo v prohlizeci a ukaze:
 - kolik hodin zbyva z limitu 20 h,
 - jestli je potreba poslat nabidku,
 - jednotlive zaznamy z `hodiny.csv`.
-- editor pro pridani, upravu a smazani zaznamu primo na strance.
+- formular pro pridani hodin.
+- samostatnou stranku `settings.html` pro token, obnovu/export a spravu existujicich zaznamu.
 
 Zapnuti v GitHubu:
 
@@ -96,8 +97,8 @@ Pokud je nastaveny GitHub token, zmena se rovnou commitne do `hodiny.csv` v repo
 Funguje to pro:
 
 - **Pridat** - prida radek a ulozi do GitHubu,
-- **Smazat** - smaze radek a ulozi do GitHubu,
-- upravu existujiciho radku - po opusteni pole ulozi do GitHubu.
+- **Smazat** v `settings.html` - smaze radek a ulozi do GitHubu,
+- upravu existujiciho radku v `settings.html` - po opusteni pole ulozi do GitHubu.
 
 Bez tokenu se zmeny ukladaji jen lokalne v prohlizeci.
 
@@ -114,9 +115,9 @@ Doporucene nastaveni tokenu:
 5. **Generate new token**.
 6. Repository access: vybrat jen `test-hodiny`.
 7. Permissions -> **Contents**: **Read and write**.
-8. Na strance kliknout na ikonku **Nastaveni**.
+8. Na strance kliknout na ikonku **Nastaveni** nebo otevrit `settings.html`.
 9. Vygenerovany token vlozit do pole **GitHub token** a kliknout **Ulozit token**.
 
 Token se uklada jen do prohlizece pres `localStorage`. Neni ulozeny v repozitari.
 
-V nastaveni jsou taky servisni tlacitka **Stahnout CSV** a **Nacist z GitHubu**.
+V `settings.html` jsou taky servisni tlacitka **Stahnout CSV** a **Nacist z GitHubu**.

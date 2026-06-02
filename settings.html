@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>test-hodiny - nastaveni</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body data-page="settings">
+    <main>
+      <header>
+        <div>
+          <h1>Nastaveni</h1>
+          <p class="subtitle">Token, obnova dat a sprava existujicich zaznamu.</p>
+        </div>
+        <a class="button-link secondary" href="./">Zpet</a>
+      </header>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>GitHub</h2>
+          <span id="saveStatus" class="save-status">Token neni nastaveny</span>
+        </div>
+        <div class="settings-grid">
+          <input id="tokenInput" type="password" autocomplete="off" placeholder="GitHub token s opravnenim Contents: Read and write">
+          <button id="saveTokenButton" type="button">Ulozit token</button>
+          <button id="clearTokenButton" class="secondary" type="button">Zapomenout token</button>
+          <button id="downloadButton" class="secondary" type="button">Stahnout CSV</button>
+          <button id="resetButton" class="secondary" type="button">Nacist z GitHubu</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Sprava zaznamu</h2>
+          <select id="monthSelect" aria-label="Mesic"></select>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Datum</th>
+              <th>Zakaznik</th>
+              <th>Popis</th>
+              <th>Typ</th>
+              <th class="number">Hodiny</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="recordsBody"></tbody>
+        </table>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
