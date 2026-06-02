@@ -229,6 +229,10 @@ td select {
   min-height: 34px;
 }
 
+td button + button {
+  margin-left: 8px;
+}
+
 .number {
   text-align: right;
   white-space: nowrap;

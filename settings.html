@@ -11,24 +11,10 @@
       <header>
         <div>
           <h1>Nastaveni</h1>
-          <p class="subtitle">Token, obnova dat a sprava existujicich zaznamu.</p>
+          <p class="subtitle">Sprava zaznamu a technicke nastaveni.</p>
         </div>
         <button id="backButton" class="secondary" type="button">Zpet</button>
       </header>
-
-      <section class="panel">
-        <div class="panel-head">
-          <h2>GitHub</h2>
-          <span id="saveStatus" class="save-status">Token neni nastaveny</span>
-        </div>
-        <div class="settings-grid">
-          <input id="tokenInput" type="password" autocomplete="off" placeholder="GitHub token s opravnenim Contents: Read and write">
-          <button id="saveTokenButton" type="button">Ulozit token</button>
-          <button id="clearTokenButton" class="secondary" type="button">Zapomenout token</button>
-          <button id="downloadButton" class="secondary" type="button">Stahnout CSV</button>
-          <button id="resetButton" class="secondary" type="button">Nacist z GitHubu</button>
-        </div>
-      </section>
 
       <section class="panel">
         <div class="panel-head">
@@ -48,6 +34,20 @@
           </thead>
           <tbody id="recordsBody"></tbody>
         </table>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>GitHub</h2>
+          <span id="saveStatus" class="save-status">Token neni nastaveny</span>
+        </div>
+        <div class="settings-grid">
+          <input id="tokenInput" type="password" autocomplete="off" placeholder="GitHub token s opravnenim Contents: Read and write">
+          <button id="saveTokenButton" type="button">Ulozit token</button>
+          <button id="clearTokenButton" class="secondary" type="button">Zapomenout token</button>
+          <button id="downloadButton" class="secondary" type="button">Stahnout CSV</button>
+          <button id="resetButton" class="secondary" type="button">Nacist z GitHubu</button>
+        </div>
       </section>
     </main>
 

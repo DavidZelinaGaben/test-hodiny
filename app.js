@@ -336,7 +336,7 @@ function renderReadonlyRecords() {
     });
 }
 
-function createEditableCell(record, key, index, type = "text") {
+function createEditableCell(record, key, draft, type = "text") {
   const cell = document.createElement("td");
   const input = document.createElement("input");
   input.type = type;
@@ -347,16 +347,15 @@ function createEditableCell(record, key, index, type = "text") {
     input.step = "0.25";
   }
 
-  input.addEventListener("change", () => {
-    records[index][key] = key === "hodiny" ? Number(input.value) : input.value.trim();
-    persistChange("Update hours record");
+  input.addEventListener("input", () => {
+    draft[key] = key === "hodiny" ? Number(input.value) : input.value.trim();
   });
 
   cell.append(input);
   return cell;
 }
 
-function createTypeCell(record, index) {
+function createTypeCell(record, draft) {
   const cell = document.createElement("td");
   const select = document.createElement("select");
 
@@ -369,8 +368,7 @@ function createTypeCell(record, index) {
 
   select.value = record.typ;
   select.addEventListener("change", () => {
-    records[index].typ = select.value;
-    persistChange("Update hours record");
+    draft.typ = select.value;
   });
 
   cell.append(select);
@@ -386,14 +384,23 @@ function renderEditableRecords() {
     .filter(({ record }) => getMonth(record) === selectedMonth())
     .sort((a, b) => b.record.datum.localeCompare(a.record.datum))
     .forEach(({ record, index }) => {
+      const draft = { ...record };
       const row = document.createElement("tr");
-      row.append(createEditableCell(record, "datum", index, "date"));
-      row.append(createEditableCell(record, "zakaznik", index));
-      row.append(createEditableCell(record, "popis", index));
-      row.append(createTypeCell(record, index));
-      row.append(createEditableCell(record, "hodiny", index, "number"));
+      row.append(createEditableCell(record, "datum", draft, "date"));
+      row.append(createEditableCell(record, "zakaznik", draft));
+      row.append(createEditableCell(record, "popis", draft));
+      row.append(createTypeCell(record, draft));
+      row.append(createEditableCell(record, "hodiny", draft, "number"));
 
       const actionCell = document.createElement("td");
+      const saveButton = document.createElement("button");
+      saveButton.type = "button";
+      saveButton.textContent = "Ulozit";
+      saveButton.addEventListener("click", () => {
+        records[index] = normalizeRecord(draft);
+        persistChange("Update hours record");
+      });
+
       const deleteButton = document.createElement("button");
       deleteButton.className = "danger";
       deleteButton.type = "button";
@@ -402,6 +409,7 @@ function renderEditableRecords() {
         records.splice(index, 1);
         persistChange("Delete hours record");
       });
+      actionCell.append(saveButton);
       actionCell.append(deleteButton);
       row.append(actionCell);
       recordsBody.append(row);
