@@ -62,10 +62,15 @@
         color: var(--muted);
       }
 
-      .toolbar {
+      .toolbar,
+      .github-settings {
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
+      }
+
+      .github-settings {
+        padding: 16px;
       }
 
       button,
@@ -103,6 +108,10 @@
         padding: 0 10px;
         background: #fff;
         color: var(--ink);
+      }
+
+      .github-settings input {
+        flex: 1 1 360px;
       }
 
       .message {
@@ -166,6 +175,12 @@
         gap: 12px;
         padding: 14px 16px;
         border-bottom: 1px solid var(--line);
+      }
+
+      .save-status {
+        color: var(--muted);
+        font-size: 13px;
+        text-align: right;
       }
 
       form {
@@ -274,7 +289,7 @@
       <header>
         <div>
           <h1>CEBES - hodiny</h1>
-          <p class="subtitle">Pridej radek primo na strance, soucet se prepocita hned.</p>
+          <p class="subtitle">Pridej radek primo na strance, soucet se prepocita hned a ulozi do GitHubu.</p>
         </div>
         <div class="toolbar">
           <select id="monthSelect" aria-label="Mesic"></select>
@@ -284,6 +299,18 @@
       </header>
 
       <p id="message" class="message">Nacitam hodiny...</p>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Ukladani do GitHubu</h2>
+          <span id="saveStatus" class="save-status">Token neni nastaveny</span>
+        </div>
+        <div class="github-settings">
+          <input id="tokenInput" type="password" autocomplete="off" placeholder="GitHub token s opravnenim Contents: Read and write">
+          <button id="saveTokenButton" type="button">Ulozit token</button>
+          <button id="clearTokenButton" class="secondary" type="button">Zapomenout token</button>
+        </div>
+      </section>
 
       <section id="summary" class="summary hidden" aria-label="Souhrn vybraneho mesice">
         <div class="metric">
@@ -363,11 +390,21 @@
       const LIMIT_HODIN = 20;
       const CSV_URL = "hodiny.csv";
       const STORAGE_KEY = "test-hodiny-records-v1";
+      const TOKEN_KEY = "test-hodiny-github-token";
+      const REPO_OWNER = "DavidZelinaGaben";
+      const REPO_NAME = "test-hodiny";
+      const REPO_BRANCH = "main";
+      const CSV_PATH = "hodiny.csv";
+      const GITHUB_CONTENTS_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${CSV_PATH}`;
 
       const monthSelect = document.getElementById("monthSelect");
       const downloadButton = document.getElementById("downloadButton");
       const resetButton = document.getElementById("resetButton");
       const message = document.getElementById("message");
+      const tokenInput = document.getElementById("tokenInput");
+      const saveTokenButton = document.getElementById("saveTokenButton");
+      const clearTokenButton = document.getElementById("clearTokenButton");
+      const saveStatus = document.getElementById("saveStatus");
       const summary = document.getElementById("summary");
       const monthsBody = document.getElementById("monthsBody");
       const recordsBody = document.getElementById("recordsBody");
@@ -385,6 +422,7 @@
 
       let records = [];
       let totals = new Map();
+      let saveQueue = Promise.resolve();
 
       datumInput.value = new Date().toISOString().slice(0, 10);
 
@@ -437,9 +475,11 @@
 
       function escapeCsv(value) {
         const text = String(value ?? "");
+
         if (/[",\n\r]/.test(text)) {
           return `"${text.replace(/"/g, '""')}"`;
         }
+
         return text;
       }
 
@@ -457,10 +497,91 @@
 
       function loadLocal() {
         const stored = localStorage.getItem(STORAGE_KEY);
+
         if (!stored) {
           return null;
         }
+
         return JSON.parse(stored).map(normalizeRecord);
+      }
+
+      function getToken() {
+        return localStorage.getItem(TOKEN_KEY) || "";
+      }
+
+      function setSaveStatus(text) {
+        saveStatus.textContent = text;
+      }
+
+      function updateTokenUi() {
+        tokenInput.value = "";
+        setSaveStatus(getToken() ? "Token ulozeny, zmeny se commituji do GitHubu" : "Token neni nastaveny");
+      }
+
+      function toBase64(text) {
+        const bytes = new TextEncoder().encode(text);
+        let binary = "";
+
+        for (const byte of bytes) {
+          binary += String.fromCharCode(byte);
+        }
+
+        return btoa(binary);
+      }
+
+      async function githubRequest(url, options = {}) {
+        const response = await fetch(url, {
+          ...options,
+          headers: {
+            Accept: "application/vnd.github+json",
+            Authorization: `Bearer ${getToken()}`,
+            "X-GitHub-Api-Version": "2022-11-28",
+            ...(options.headers || {}),
+          },
+        });
+
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(`GitHub chyba ${response.status}: ${text}`);
+        }
+
+        return response.json();
+      }
+
+      async function commitToGithub(reason) {
+        if (!getToken()) {
+          setSaveStatus("Neulozeno do GitHubu - chybi token");
+          return;
+        }
+
+        setSaveStatus("Ukladam do GitHubu...");
+        const currentFile = await githubRequest(`${GITHUB_CONTENTS_URL}?ref=${REPO_BRANCH}`);
+
+        await githubRequest(GITHUB_CONTENTS_URL, {
+          method: "PUT",
+          body: JSON.stringify({
+            branch: REPO_BRANCH,
+            message: reason,
+            content: toBase64(recordsToCsv()),
+            sha: currentFile.sha,
+          }),
+        });
+
+        setSaveStatus(`Ulozeno do GitHubu ${new Date().toLocaleTimeString("cs-CZ")}`);
+      }
+
+      function persistChange(reason) {
+        saveLocal();
+        render();
+
+        if (!getToken()) {
+          setSaveStatus("Zmena je jen v prohlizeci - pro GitHub vloz token");
+          return;
+        }
+
+        saveQueue = saveQueue
+          .then(() => commitToGithub(reason))
+          .catch((error) => setSaveStatus(error.message));
       }
 
       function formatHours(value) {
@@ -537,11 +658,17 @@
         const input = document.createElement("input");
         input.type = type;
         input.value = record[key];
+
+        if (type === "number") {
+          input.min = "0.25";
+          input.step = "0.25";
+        }
+
         input.addEventListener("change", () => {
           records[index][key] = key === "hodiny" ? Number(input.value) : input.value.trim();
-          saveLocal();
-          render();
+          persistChange("Update hours record");
         });
+
         cell.append(input);
         return cell;
       }
@@ -560,8 +687,7 @@
         select.value = record.typ;
         select.addEventListener("change", () => {
           records[index].typ = select.value;
-          saveLocal();
-          render();
+          persistChange("Update hours record");
         });
 
         cell.append(select);
@@ -591,8 +717,7 @@
             deleteButton.textContent = "Smazat";
             deleteButton.addEventListener("click", () => {
               records.splice(index, 1);
-              saveLocal();
-              render();
+              persistChange("Delete hours record");
             });
             actionCell.append(deleteButton);
             row.append(actionCell);
@@ -613,7 +738,9 @@
           return;
         }
 
-        message.textContent = "Zmeny na strance se ukladaji v tomhle prohlizeci. Pro ulozeni do GitHubu stahni CSV a nahraj ho do repo.";
+        message.textContent = getToken()
+          ? "Zmeny se po pridani, smazani nebo uprave ukladaji committem do GitHubu."
+          : "Zmeny se zatim ukladaji jen v tomhle prohlizeci. Pro automaticke ukladani do GitHubu vloz token.";
         message.classList.remove("hidden");
         keepSelectedMonth(previousMonth);
         renderSummary();
@@ -623,9 +750,11 @@
 
       async function loadFromGithub() {
         const response = await fetch(`${CSV_URL}?t=${Date.now()}`);
+
         if (!response.ok) {
           throw new Error("Nepodarilo se nacist hodiny.csv.");
         }
+
         records = parseCsv(await response.text());
       }
 
@@ -642,6 +771,25 @@
         render();
       }
 
+      saveTokenButton.addEventListener("click", () => {
+        const token = tokenInput.value.trim();
+
+        if (!token) {
+          setSaveStatus("Token je prazdny");
+          return;
+        }
+
+        localStorage.setItem(TOKEN_KEY, token);
+        updateTokenUi();
+        render();
+      });
+
+      clearTokenButton.addEventListener("click", () => {
+        localStorage.removeItem(TOKEN_KEY);
+        updateTokenUi();
+        render();
+      });
+
       addForm.addEventListener("submit", (event) => {
         event.preventDefault();
         records.push(normalizeRecord({
@@ -653,8 +801,7 @@
         }));
         popisInput.value = "";
         hodinyInput.value = "";
-        saveLocal();
-        render();
+        persistChange("Add hours record");
       });
 
       monthSelect.addEventListener("change", () => {
@@ -680,6 +827,7 @@
         render();
       });
 
+      updateTokenUi();
       start().catch((error) => {
         message.textContent = error.message;
         message.classList.remove("hidden");

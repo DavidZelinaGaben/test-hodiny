@@ -89,8 +89,31 @@ GitHub pak ukaze odkaz na hotovou stranku.
 
 Na strance je formular **Pridat hodiny**.
 
-Po pridani radku se souhrn prepocita hned na strance. Zmeny se ukladaji do prohlizece, takze zustanou pri obnoveni stranky na stejnem pocitaci.
+Po pridani radku se souhrn prepocita hned na strance.
 
-Tlacitko **Stahnout CSV** stahne aktualni tabulku jako `hodiny.csv`.
+Pokud je nastaveny GitHub token, zmena se rovnou commitne do `hodiny.csv` v repozitari.
 
-Pozor: GitHub Pages je staticka stranka, takze bez backendu neumi sama zapisovat do repozitare. Pro trvale ulozeni pro vsechny je potreba stazene `hodiny.csv` nahrat zpet do GitHubu.
+Funguje to pro:
+
+- **Pridat** - prida radek a ulozi do GitHubu,
+- **Smazat** - smaze radek a ulozi do GitHubu,
+- upravu existujiciho radku - po opusteni pole ulozi do GitHubu.
+
+Bez tokenu se zmeny ukladaji jen lokalne v prohlizeci.
+
+## GitHub token pro automaticke ukladani
+
+GitHub Pages je staticka stranka, takze pro zapis do repozitare potrebuje GitHub token.
+
+Doporucene nastaveni tokenu:
+
+1. GitHub -> **Settings**.
+2. **Developer settings**.
+3. **Personal access tokens**.
+4. **Fine-grained tokens**.
+5. **Generate new token**.
+6. Repository access: vybrat jen `test-hodiny`.
+7. Permissions -> **Contents**: **Read and write**.
+8. Vygenerovany token vlozit na strance do pole **GitHub token** a kliknout **Ulozit token**.
+
+Token se uklada jen do prohlizece pres `localStorage`. Neni ulozeny v repozitari.
