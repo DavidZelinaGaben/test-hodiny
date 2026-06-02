@@ -38,7 +38,7 @@
 
       header {
         display: flex;
-        align-items: flex-end;
+        align-items: flex-start;
         justify-content: space-between;
         gap: 18px;
         margin-bottom: 18px;
@@ -63,10 +63,19 @@
       }
 
       .toolbar,
+      .panel-tools,
       .github-settings {
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
+      }
+
+      .toolbar {
+        align-items: center;
+      }
+
+      .panel-tools {
+        align-items: center;
       }
 
       .github-settings {
@@ -98,9 +107,10 @@
       }
 
       button.icon-button {
-        width: 38px;
+        width: 42px;
+        min-width: 42px;
         padding: 0;
-        font-size: 20px;
+        font-size: 21px;
         line-height: 1;
       }
 
@@ -306,7 +316,6 @@
           <p class="subtitle">Pridej radek primo na strance, soucet se prepocita hned a ulozi do GitHubu.</p>
         </div>
         <div class="toolbar">
-          <select id="monthSelect" aria-label="Mesic"></select>
           <button id="settingsButton" class="icon-button secondary" type="button" aria-label="Nastaveni" title="Nastaveni">⚙</button>
         </div>
       </header>
@@ -361,7 +370,7 @@
             <option value="jine">jine</option>
           </select>
           <input id="popisInput" placeholder="Popis prace" required aria-label="Popis prace">
-          <input id="hodinyInput" type="number" min="0.25" step="0.25" placeholder="1" required aria-label="Hodiny">
+          <input id="hodinyInput" type="number" min="0.25" step="0.25" required aria-label="Hodiny">
           <button type="submit">Pridat</button>
         </form>
       </section>
@@ -369,6 +378,9 @@
       <section class="panel">
         <div class="panel-head">
           <h2>Mesice</h2>
+          <div class="panel-tools">
+            <select id="monthSelect" aria-label="Mesic"></select>
+          </div>
         </div>
         <table>
           <thead>
