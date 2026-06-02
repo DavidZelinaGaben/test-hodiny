@@ -542,7 +542,9 @@
 
         if (!response.ok) {
           const text = await response.text();
-          throw new Error(`GitHub chyba ${response.status}: ${text}`);
+          const error = new Error(`GitHub chyba ${response.status}: ${text}`);
+          error.status = response.status;
+          throw error;
         }
 
         return response.json();
@@ -555,19 +557,36 @@
         }
 
         setSaveStatus("Ukladam do GitHubu...");
-        const currentFile = await githubRequest(`${GITHUB_CONTENTS_URL}?ref=${REPO_BRANCH}`);
-
-        await githubRequest(GITHUB_CONTENTS_URL, {
-          method: "PUT",
-          body: JSON.stringify({
-            branch: REPO_BRANCH,
-            message: reason,
-            content: toBase64(recordsToCsv()),
-            sha: currentFile.sha,
-          }),
-        });
+        await putCsvToGithub(reason);
 
         setSaveStatus(`Ulozeno do GitHubu ${new Date().toLocaleTimeString("cs-CZ")}`);
+      }
+
+      async function putCsvToGithub(reason) {
+        const content = toBase64(recordsToCsv());
+
+        for (let attempt = 1; attempt <= 2; attempt += 1) {
+          const currentFile = await githubRequest(`${GITHUB_CONTENTS_URL}?ref=${REPO_BRANCH}&t=${Date.now()}`);
+
+          try {
+            await githubRequest(GITHUB_CONTENTS_URL, {
+              method: "PUT",
+              body: JSON.stringify({
+                branch: REPO_BRANCH,
+                message: reason,
+                content,
+                sha: currentFile.sha,
+              }),
+            });
+            return;
+          } catch (error) {
+            if (error.status !== 409 || attempt === 2) {
+              throw error;
+            }
+
+            setSaveStatus("Soubor se mezitim zmenil, zkousim ulozit znovu...");
+          }
+        }
       }
 
       function persistChange(reason) {
