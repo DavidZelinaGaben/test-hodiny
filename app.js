@@ -129,6 +129,17 @@ function toBase64(text) {
   return btoa(binary);
 }
 
+function fromBase64(text) {
+  const binary = atob(text.replace(/\s/g, ""));
+  const bytes = new Uint8Array(binary.length);
+
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+
+  return new TextDecoder().decode(bytes);
+}
+
 async function githubRequest(url, options = {}) {
   const response = await fetch(url, {
     ...options,
@@ -418,6 +429,12 @@ function render() {
 }
 
 async function loadFromGithub() {
+  if (getToken()) {
+    const currentFile = await githubRequest(`${GITHUB_CONTENTS_URL}?ref=${REPO_BRANCH}&t=${Date.now()}`);
+    records = parseCsv(fromBase64(currentFile.content));
+    return;
+  }
+
   const response = await fetch(`${CSV_URL}?t=${Date.now()}`);
 
   if (!response.ok) {
