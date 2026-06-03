@@ -198,12 +198,18 @@ form {
   display: grid;
   grid-template-columns: minmax(260px, 1fr) auto auto auto auto;
   gap: 10px;
-  padding: 16px;
+  padding: 0 16px 16px;
 }
 
 .settings-grid.compact-actions {
   grid-template-columns: repeat(2, auto);
   justify-content: start;
+}
+
+.settings-note {
+  margin: 0;
+  padding: 14px 16px 10px;
+  color: var(--muted);
 }
 
 table {

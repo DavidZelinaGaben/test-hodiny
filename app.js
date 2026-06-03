@@ -93,6 +93,13 @@ function setMessage(text) {
   }
 }
 
+function clearMessage() {
+  const message = byId("message");
+  if (message) {
+    message.classList.add("hidden");
+  }
+}
+
 function setSaveStatus(text) {
   const saveStatus = byId("saveStatus");
   if (saveStatus) {
@@ -371,7 +378,7 @@ function render() {
     return;
   }
 
-  setMessage("Automaticke ukladani pres Cloudflare Worker je zapnute.");
+  clearMessage();
   updateMonthSelect(previousMonth);
   renderSummary();
   renderMonths();
