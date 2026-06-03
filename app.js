@@ -1,14 +1,7 @@
 const LIMIT_HODIN = 20;
 const CSV_URL = "hodiny.csv";
 const STORAGE_KEY = "test-hodiny-records-v1";
-const TOKEN_KEY = "test-hodiny-github-token";
-// Firemni token vloz mezi uvozovky. Nech prazdne pro rucni token v prohlizeci.
-const SHARED_GITHUB_TOKEN = "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";
-const REPO_OWNER = "DavidZelinaGaben";
-const REPO_NAME = "test-hodiny";
-const REPO_BRANCH = "main";
-const CSV_PATH = "hodiny.csv";
-const GITHUB_CONTENTS_URL = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${CSV_PATH}`;
+const API_BASE_URL = "https://test-hodiny-api.david-zelina.workers.dev";
 
 const page = document.body.dataset.page;
 let records = [];
@@ -92,14 +85,6 @@ function loadLocal() {
   return stored ? JSON.parse(stored).map(normalizeRecord) : null;
 }
 
-function getToken() {
-  return SHARED_GITHUB_TOKEN.trim() || localStorage.getItem(TOKEN_KEY) || "";
-}
-
-function hasSharedToken() {
-  return SHARED_GITHUB_TOKEN.trim().length > 0;
-}
-
 function setMessage(text) {
   const message = byId("message");
   if (message) {
@@ -117,58 +102,22 @@ function setSaveStatus(text) {
   }
 }
 
-function updateTokenUi() {
-  const tokenInput = byId("tokenInput");
-  if (tokenInput) {
-    tokenInput.value = "";
-    tokenInput.disabled = hasSharedToken();
-    tokenInput.placeholder = hasSharedToken()
-      ? "Firemni token je nastaveny v aplikaci"
-      : "GitHub token s opravnenim Contents: Read and write";
-  }
-  setSaveStatus(hasSharedToken()
-    ? "Firemni token nastaveny"
-    : getToken()
-      ? "Token ulozeny"
-      : "Token neni nastaveny");
+function updateApiUi() {
+  setSaveStatus("Cloudflare Worker API aktivni");
 }
 
-function toBase64(text) {
-  const bytes = new TextEncoder().encode(text);
-  let binary = "";
-
-  for (const byte of bytes) {
-    binary += String.fromCharCode(byte);
-  }
-
-  return btoa(binary);
-}
-
-function fromBase64(text) {
-  const binary = atob(text.replace(/\s/g, ""));
-  const bytes = new Uint8Array(binary.length);
-
-  for (let index = 0; index < binary.length; index += 1) {
-    bytes[index] = binary.charCodeAt(index);
-  }
-
-  return new TextDecoder().decode(bytes);
-}
-
-async function githubRequest(url, options = {}) {
-  const response = await fetch(url, {
+async function apiRequest(path, options = {}) {
+  const response = await fetch(`${API_BASE_URL}${path}`, {
     ...options,
     headers: {
-      Accept: "application/vnd.github+json",
-      Authorization: `Bearer ${getToken()}`,
-      "X-GitHub-Api-Version": "2022-11-28",
+      "Content-Type": "application/json",
       ...(options.headers || {}),
     },
   });
 
   if (!response.ok) {
     const text = await response.text();
-    const error = new Error(`GitHub chyba ${response.status}: ${text}`);
+    const error = new Error(`API chyba ${response.status}: ${text}`);
     error.status = response.status;
     throw error;
   }
@@ -177,37 +126,16 @@ async function githubRequest(url, options = {}) {
 }
 
 async function commitToGithub(reason) {
-  if (!getToken()) {
-    setSaveStatus("Neulozeno do GitHubu - chybi token");
-    return;
-  }
-
-  setSaveStatus("Ukladam do GitHubu...");
-  const content = toBase64(recordsToCsv());
-
-  for (let attempt = 1; attempt <= 2; attempt += 1) {
-    const currentFile = await githubRequest(`${GITHUB_CONTENTS_URL}?ref=${REPO_BRANCH}&t=${Date.now()}`);
-
-    try {
-      await githubRequest(GITHUB_CONTENTS_URL, {
-        method: "PUT",
-        body: JSON.stringify({
-          branch: REPO_BRANCH,
-          message: reason,
-          content,
-          sha: currentFile.sha,
-        }),
-      });
-      saveLocal();
-      setSaveStatus(`Ulozeno do GitHubu ${new Date().toLocaleTimeString("cs-CZ")}`);
-      return;
-    } catch (error) {
-      if (error.status !== 409 || attempt === 2) {
-        throw error;
-      }
-      setSaveStatus("Soubor se mezitim zmenil, zkousim ulozit znovu...");
-    }
-  }
+  setSaveStatus("Ukladam pres Cloudflare...");
+  await apiRequest("/hodiny", {
+    method: "PUT",
+    body: JSON.stringify({
+      csv: recordsToCsv(),
+      message: reason,
+    }),
+  });
+  saveLocal();
+  setSaveStatus(`Ulozeno do GitHubu ${new Date().toLocaleTimeString("cs-CZ")}`);
 }
 
 function updateSavingUi() {
@@ -217,11 +145,6 @@ function updateSavingUi() {
 function persistChange(reason) {
   saveLocal();
   render();
-
-  if (!getToken()) {
-    setSaveStatus("Zmena je jen v prohlizeci - pro GitHub nastav token");
-    return;
-  }
 
   pendingSaves += 1;
   updateSavingUi();
@@ -448,9 +371,7 @@ function render() {
     return;
   }
 
-  setMessage(getToken()
-    ? "Automaticke ukladani do GitHubu je zapnute."
-    : "Pro automaticke ukladani nastav token v Nastaveni.");
+  setMessage("Automaticke ukladani pres Cloudflare Worker je zapnute.");
   updateMonthSelect(previousMonth);
   renderSummary();
   renderMonths();
@@ -463,19 +384,19 @@ function render() {
 }
 
 async function loadFromGithub() {
-  if (getToken()) {
-    const currentFile = await githubRequest(`${GITHUB_CONTENTS_URL}?ref=${REPO_BRANCH}&t=${Date.now()}`);
-    records = parseCsv(fromBase64(currentFile.content));
+  try {
+    const data = await apiRequest("/hodiny");
+    records = parseCsv(data.csv || "");
     return;
+  } catch (workerError) {
+    const response = await fetch(`${CSV_URL}?t=${Date.now()}`);
+
+    if (!response.ok) {
+      throw workerError;
+    }
+
+    records = parseCsv(await response.text());
   }
-
-  const response = await fetch(`${CSV_URL}?t=${Date.now()}`);
-
-  if (!response.ok) {
-    throw new Error("Nepodarilo se nacist hodiny.csv.");
-  }
-
-  records = parseCsv(await response.text());
 }
 
 async function start() {
@@ -537,43 +458,6 @@ function bindSettingsPage() {
     window.location.href = "./";
   });
 
-  byId("saveTokenButton").addEventListener("click", () => {
-    if (hasSharedToken()) {
-      setSaveStatus("Firemni token je nastaveny v aplikaci");
-      return;
-    }
-
-    const token = byId("tokenInput").value.trim();
-
-    if (!token) {
-      setSaveStatus("Token je prazdny");
-      return;
-    }
-
-    localStorage.setItem(TOKEN_KEY, token);
-    updateTokenUi();
-    render();
-  });
-
-  byId("clearTokenButton").addEventListener("click", () => {
-    if (hasSharedToken()) {
-      setSaveStatus("Firemni token nejde zapomenout z prohlizece");
-      return;
-    }
-
-    const confirmed = window.confirm(
-      "Opravdu zapomenout GitHub token? Bez tokenu se zmeny nebudou ukladat do GitHubu."
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
-    localStorage.removeItem(TOKEN_KEY);
-    updateTokenUi();
-    render();
-  });
-
   byId("downloadButton").addEventListener("click", () => {
     const blob = new Blob([recordsToCsv()], { type: "text/csv;charset=utf-8" });
     const link = document.createElement("a");
@@ -610,7 +494,7 @@ if (monthSelect) {
   });
 }
 
-updateTokenUi();
+updateApiUi();
 start().catch((error) => setMessage(error.message));
 
 window.addEventListener("beforeunload", (event) => {

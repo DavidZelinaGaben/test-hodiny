@@ -201,6 +201,11 @@ form {
   padding: 16px;
 }
 
+.settings-grid.compact-actions {
+  grid-template-columns: repeat(2, auto);
+  justify-content: start;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
