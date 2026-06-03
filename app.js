@@ -2,6 +2,8 @@ const LIMIT_HODIN = 20;
 const CSV_URL = "hodiny.csv";
 const STORAGE_KEY = "test-hodiny-records-v1";
 const TOKEN_KEY = "test-hodiny-github-token";
+// Firemni token vloz mezi uvozovky. Nech prazdne pro rucni token v prohlizeci.
+const SHARED_GITHUB_TOKEN = "";
 const REPO_OWNER = "DavidZelinaGaben";
 const REPO_NAME = "test-hodiny";
 const REPO_BRANCH = "main";
@@ -91,7 +93,11 @@ function loadLocal() {
 }
 
 function getToken() {
-  return localStorage.getItem(TOKEN_KEY) || "";
+  return SHARED_GITHUB_TOKEN.trim() || localStorage.getItem(TOKEN_KEY) || "";
+}
+
+function hasSharedToken() {
+  return SHARED_GITHUB_TOKEN.trim().length > 0;
 }
 
 function setMessage(text) {
@@ -115,8 +121,16 @@ function updateTokenUi() {
   const tokenInput = byId("tokenInput");
   if (tokenInput) {
     tokenInput.value = "";
+    tokenInput.disabled = hasSharedToken();
+    tokenInput.placeholder = hasSharedToken()
+      ? "Firemni token je nastaveny v aplikaci"
+      : "GitHub token s opravnenim Contents: Read and write";
   }
-  setSaveStatus(getToken() ? "Token ulozeny" : "Token neni nastaveny");
+  setSaveStatus(hasSharedToken()
+    ? "Firemni token nastaveny"
+    : getToken()
+      ? "Token ulozeny"
+      : "Token neni nastaveny");
 }
 
 function toBase64(text) {
@@ -524,6 +538,11 @@ function bindSettingsPage() {
   });
 
   byId("saveTokenButton").addEventListener("click", () => {
+    if (hasSharedToken()) {
+      setSaveStatus("Firemni token je nastaveny v aplikaci");
+      return;
+    }
+
     const token = byId("tokenInput").value.trim();
 
     if (!token) {
@@ -537,6 +556,11 @@ function bindSettingsPage() {
   });
 
   byId("clearTokenButton").addEventListener("click", () => {
+    if (hasSharedToken()) {
+      setSaveStatus("Firemni token nejde zapomenout z prohlizece");
+      return;
+    }
+
     const confirmed = window.confirm(
       "Opravdu zapomenout GitHub token? Bez tokenu se zmeny nebudou ukladat do GitHubu."
     );
