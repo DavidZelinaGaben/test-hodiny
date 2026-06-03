@@ -3,7 +3,7 @@ const CSV_URL = "hodiny.csv";
 const STORAGE_KEY = "test-hodiny-records-v1";
 const TOKEN_KEY = "test-hodiny-github-token";
 // Firemni token vloz mezi uvozovky. Nech prazdne pro rucni token v prohlizeci.
-const SHARED_GITHUB_TOKEN = "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";
+const SHARED_GITHUB_TOKEN = "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";
 const REPO_OWNER = "DavidZelinaGaben";
 const REPO_NAME = "test-hodiny";
 const REPO_BRANCH = "main";
