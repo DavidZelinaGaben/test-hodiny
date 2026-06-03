@@ -98,7 +98,7 @@ def vypis_souhrn(soucty: dict[str, float], mesic: str | None = None) -> int:
             print(f"Prekroceno: {format_hodin(abs(zbyva))} h")
             print("Stav: poslat nabidku")
 
-    return 1 if prekroceno else 0
+    return 0
 
 
 def vytvor_parser() -> argparse.ArgumentParser:
