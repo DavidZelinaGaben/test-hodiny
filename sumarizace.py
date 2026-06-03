@@ -96,7 +96,7 @@ def vypis_souhrn(soucty: dict[str, float], mesic: str | None = None) -> int:
         else:
             prekroceno = True
             print(f"Prekroceno: {format_hodin(abs(zbyva))} h")
-            print("Stav: poslat nabidku")
+            print("Stav: Prekroceno")
 
     return 0
 

@@ -224,7 +224,7 @@ function renderSummary() {
   byId("balanceValue").textContent = overLimit
     ? `Prekroceno ${formatHours(Math.abs(balance))}`
     : formatHours(balance);
-  byId("statusValue").textContent = overLimit ? "Poslat nabidku" : "OK";
+  byId("statusValue").textContent = overLimit ? "Prekroceno" : "OK";
 
   byId("statusMetric").classList.toggle("status-ok", !overLimit);
   byId("statusMetric").classList.toggle("status-warn", overLimit);
@@ -247,7 +247,7 @@ function renderMonths() {
       <td>${month}</td>
       <td class="number">${formatHours(used)}</td>
       <td class="number">${overLimit ? `-${formatHours(Math.abs(balance))}` : formatHours(balance)}</td>
-      <td><span class="badge ${overLimit ? "warn" : "ok"}">${overLimit ? "Nabidka" : "OK"}</span></td>
+      <td><span class="badge ${overLimit ? "warn" : "ok"}">${overLimit ? "Prekroceno" : "OK"}</span></td>
     `;
     monthsBody.append(row);
   }
